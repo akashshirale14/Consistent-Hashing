@@ -64,6 +64,7 @@ public class StorageNode {
     }
 
     public void printAllData() {
+        System.out.println("=========================================");
         for(Map.Entry<String,String> entry : data.entrySet()) {
             System.out.println("Key: " + entry.getKey() + " : Value: " + entry.getValue());
         }

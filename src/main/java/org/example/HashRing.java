@@ -151,5 +151,32 @@ public class HashRing {
         newNode.printAllData();
     }
 
+    private void transferDataAfterRemoval(StorageNode leavingNode, StorageNode receivingNode) {
+        Map<String, String> currData = leavingNode.getAllData();
+        for (Map.Entry<String, String> entry : currData.entrySet()) {
+            System.out.println("Transferring Data: Key: " + entry.getKey() + " : " + entry.getValue());
+            receivingNode.addData(entry.getKey(),entry.getValue());
+        }
+    }
+
+    public void removeNode(String ip) {
+        BigInteger ipHash = calculateHash(ip);
+        int currIndex = tokenList.indexOf(ipHash);
+        if (currIndex == -1 ) {
+            System.out.println("Node doesnt exist in the ring");
+            return;
+        }
+        int nextIndex = currIndex + 1;
+        if (currIndex == tokenList.size() - 1) {
+            nextIndex = 0;
+        }
+        StorageNode leavingNode = nodeList.get(currIndex);
+        leavingNode.printAllData();
+        StorageNode receivingNode = nodeList.get(nextIndex);
+        receivingNode.printAllData();
+        transferDataAfterRemoval(leavingNode,receivingNode);
+        receivingNode.printAllData();
+    }
+
 
 }

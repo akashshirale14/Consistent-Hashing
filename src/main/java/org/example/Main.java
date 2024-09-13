@@ -24,5 +24,7 @@ public class Main {
         System.out.println(hashRing.tokenList);
         hashRing.addNode("10.50.44.56");
         System.out.println(hashRing.getRingSetup());
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++");
+        hashRing.removeNode("10.50.44.56");
     }
 }

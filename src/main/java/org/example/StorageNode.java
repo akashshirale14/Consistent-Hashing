@@ -16,6 +16,15 @@ public class StorageNode {
     public StorageNode(String ip)  {
         this.ip = ip;
         data = new HashMap<>();
+        if (ip.equals("10.50.44.52")) {
+           data.put("Cabbage", "35");
+           data.put("Onion", "22");
+           data.put("Potato", "90");
+           data.put("Avira","Hello");
+           data.put("Aariv","Hello2");
+           data.put("Tanvi","78");
+           data.put("Mummy", "86");
+        }
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException na) {
@@ -40,8 +49,24 @@ public class StorageNode {
         return data.get(key);
     }
 
+    public Map<String, String> getAllData() {
+        return data;
+    }
+
     public BigInteger getHash(){
         return hash;
+    }
+
+    public void removeTransferredData(Map<String, String> transferredData) {
+        for(Map.Entry<String, String> entry : transferredData.entrySet()) {
+            data.remove(entry.getKey());
+        }
+    }
+
+    public void printAllData() {
+        for(Map.Entry<String,String> entry : data.entrySet()) {
+            System.out.println("Key: " + entry.getKey() + " : Value: " + entry.getValue());
+        }
     }
 
     public BigInteger calculateHash() {

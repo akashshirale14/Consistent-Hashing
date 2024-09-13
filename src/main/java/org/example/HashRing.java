@@ -10,6 +10,8 @@ public class HashRing {
     List<StorageNode> nodeList;
     List<BigInteger> tokenList;
     private MessageDigest digest;
+    Map<BigInteger, StorageNode> tokenHashMap;
+
     public HashRing() {
         this.nodeList = new ArrayList<>();
         this.tokenList = new ArrayList<>();
@@ -18,6 +20,7 @@ public class HashRing {
         } catch (NoSuchAlgorithmException na) {
             System.out.println("Invalid Algorithm for hashing" + na);
         }
+        tokenHashMap = new HashMap<>();
     }
 
     public void setupStorageNodes() {
@@ -35,7 +38,8 @@ public class HashRing {
     }
 
     public void setupTokenList(){
-        Map<BigInteger, StorageNode> tokenHashMap = new HashMap<>();
+        tokenList.clear();
+        tokenHashMap.clear();;
         for (StorageNode currNode : nodeList) {
             BigInteger hashValue = currNode.getHash();
             tokenList.add(hashValue);
@@ -50,6 +54,9 @@ public class HashRing {
 
     public void upload(String key, String  value) {
         int index = hash_function(key);
+        if (index == -1) {
+            index = 0;
+        }
         StorageNode currNode = nodeList.get(index);
         System.out.println("Key : " + key + " At : " +currNode.getIp());
         currNode.addData(key, value);
@@ -95,6 +102,53 @@ public class HashRing {
             }
         }
         return index;
+    }
+
+    public List<String> getRingSetup() {
+        List<String> ans  = new ArrayList<>();
+        for (StorageNode curr : nodeList) {
+            ans.add(curr.getIp());
+        }
+        return ans;
+    }
+
+    public void addNode(String ip) {
+        System.out.println("Adding new node...");
+        StorageNode newNode = new StorageNode(ip);
+        nodeList.add(newNode);
+        setupTokenList();
+        int newIndex = tokenList.indexOf(newNode.calculateHash());
+        int nextNodeIndex = newIndex + 1;
+        if (newIndex == tokenList.size()-1) {
+            nextNodeIndex = 0;
+        }
+        int prevNodeIndex = newIndex - 1;
+        if (newIndex == 0) {
+            prevNodeIndex = tokenList.size() - 1;
+        }
+        transferData(tokenList.get(prevNodeIndex),tokenList.get(newIndex), nodeList.get(nextNodeIndex), nodeList.get(newIndex));
+    }
+
+    private void transferData(BigInteger start, BigInteger end, StorageNode oldNode, StorageNode newNode) {
+        System.out.println("Transferring data from old node: " + oldNode.getIp() + " to new node: " + newNode.getIp());
+        Map<String, String> oldNodeData = oldNode.getAllData();
+        Map<String, String> transferredData = new HashMap<>();
+        for(Map.Entry<String, String> entry : oldNodeData.entrySet()) {
+            String key = entry.getKey();
+            BigInteger keyHash = calculateHash(key);
+            if (keyHash.compareTo(start) > 0 && keyHash.compareTo(end)<=0) {
+                System.out.println("Moving key " + key + " to new node");
+                newNode.addData(key,entry.getValue());
+                transferredData.put(key, entry.getValue());
+            }
+        }
+        System.out.println("Printing currData...");
+        oldNode.printAllData();
+        oldNode.removeTransferredData(transferredData);
+        System.out.println("Printing newData...");
+        oldNode.printAllData();
+        System.out.println("***********************************************");
+        newNode.printAllData();
     }
 
 
